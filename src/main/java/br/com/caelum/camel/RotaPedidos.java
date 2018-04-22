@@ -14,8 +14,15 @@ public class RotaPedidos {
 			@Override
 			public void configure() throws Exception {
 				from("file:pedidos?noop=true&delay=5s")
+				.split()
+					.xpath("/pedido/itens/item")
+				.filter()
+					.xpath("/item/formato[text()='EBOOK']")
+				.marshal()
+				.xmljson()
 				.log("${exchange.pattern}")
 				.log("${id} - ${body}")
+				.setHeader("CamelFileName",simple("${file:name.noext}.json"))
 				.to("file:saida");
 			}
 		});
